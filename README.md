@@ -144,3 +144,11 @@ Where you place your Suspense boundaries will depend on a few things:
 --How you want the user to experience the page as it streams.
 --What content you want to prioritize.
 --If the components rely on data fetching.
+
+### CH. 10: Partial Prerendering
+Combining Static and Dynamic Content
+Currently, if you call a dynamic function inside your route (e.g. noStore(), cookies(), etc), your entire route becomes dynamic.
+
+This is how most web apps are built today. You either choose between static and dynamic rendering for your entire application or for a specific route.
+
+However, most routes are not fully static or dynamic. You may have a route that has both static and dynamic content. For example, consider an ecommerce site. You might be able to prerender the majority of the product page, but you may want to fetch the user's cart and recommended products dynamically on-demand.
