@@ -74,3 +74,73 @@ By default, Next.js applications use React Server Components. Fetching data with
   logic on the server and only send the result to the client.
 --As mentioned before, since Server Components execute on the server, you can query 
   the database directly without an additional API layer.
+
+### CH. 8: Static and Dynamic Rendering
+In the previous chapter, you fetched data for the Dashboard Overview page. However, we briefly discussed two limitations of the current setup:
+
+The data requests are creating an unintentional waterfall.
+The dashboard is static, so any data updates will not be reflected on your application.
+
+What is Static Rendering?
+With static rendering, data fetching and rendering happens on the server at build time (when you deploy) or during revalidation. The result can then be distributed and cached in a Content Delivery Network (CDN).
+Whenever a user visits your application, the cached result is served. There are a couple of benefits of static rendering:
+
+Faster Websites - Prerendered content can be cached and globally distributed. This ensures that users around the world can access your website's content more quickly and reliably.
+Reduced Server Load - Because the content is cached, your server does not have to dynamically generate content for each user request.
+SEO - Prerendered content is easier for search engine crawlers to index, as the content is already available when the page loads. This can lead to improved search engine rankings.
+Static rendering is useful for UI with no data or data that is shared across users, such as a static blog post or a product page. It might not be a good fit for a dashboard that has personalized data that is regularly updated.
+
+What is Dynamic Rendering?
+With dynamic rendering, content is rendered on the server for each user at request time (when the user visits the page). There are a couple of benefits of dynamic rendering:
+
+Real-Time Data - Dynamic rendering allows your application to display real-time or frequently updated data. This is ideal for applications where data changes often.
+User-Specific Content - It's easier to serve personalized content, such as dashboards or user profiles, and update the data based on user interaction.
+Request Time Information - Dynamic rendering allows you to access information that can only be known at request time, such as cookies or the URL search parameters.
+
+With dynamic rendering, your application is only as fast as your slowest data fetch.
+
+### CH. 9: Streaming
+
+#### What is streaming?
+Streaming is a data transfer technique that allows you to break down a route into smaller "chunks" and progressively stream them from the server to the client as they become ready.
+
+##### loading.tsx
+--loading.tsx is a special Next.js file built on top of Suspense, it allows you to create fallback UI to show 
+  as a replacement while page content loads.
+--Since <SideNav> is static, it's shown immediately. The user can interact with <SideNav> while the dynamic 
+  content is loading.
+--The user doesn't have to wait for the page to finish loading before navigating away (this is called 
+  interruptable navigation).
+
+#### Adding loading skeletons
+A loading skeleton is a simplified version of the UI. Many websites use them as a placeholder (or fallback) to indicate to users that the content is loading. Any UI you embed into loading.tsx will be embedded as part of the static file, and sent first. Then, the rest of the dynamic content will be streamed from the server to the client.
+
+##### Fixing the loading skeleton bug with route groups
+Right now, your loading skeleton will apply to the invoices and customers pages as well.
+
+Since loading.tsx is a level higher than /invoices/page.tsx and /customers/page.tsx in the file system, it's also applied to those pages.
+
+We can change this with Route Groups. Create a new folder called /(overview) inside the dashboard folder. Then, move your loading.tsx and page.tsx files inside the folder:
+
+Route groups allow you to organize files into logical groups without affecting the URL path structure. When you create a new folder using parentheses (), the name won't be included in the URL path. So /dashboard/(overview)/page.tsx becomes /dashboard.
+
+Here, you're using a route group to ensure loading.tsx only applies to your dashboard overview page. However, you can also use route groups to separate your application into sections (e.g. (marketing) routes and (shop) routes) or by teams for larger applications.
+
+#### Streaming a component
+So far, you're streaming a whole page. But, instead, you can be more granular and stream specific components using React Suspense.
+
+Suspense allows you to defer rendering parts of your application until some condition is met (e.g. data is loaded). You can wrap your dynamic components in Suspense. Then, pass it a fallback component to show while the dynamic component loads.
+
+If you remember the slow data request, fetchRevenue(), this is the request that is slowing down the whole page. Instead of blocking your page, you can use Suspense to stream only this component and immediately show the rest of the page's UI.
+
+#### Grouping components
+Great! You're almost there, now you need to wrap the <Card> components in Suspense. You can fetch data for each individual card, but this could lead to a popping effect as the cards load in, this can be visually jarring for the user.
+
+To create more of a staggered effect, you can group the cards using a wrapper component. This means the static <SideNav/> will be shown first, followed by the cards, etc.
+
+#### Deciding where to place your Suspense boundaries
+Where you place your Suspense boundaries will depend on a few things:
+
+--How you want the user to experience the page as it streams.
+--What content you want to prioritize.
+--If the components rely on data fetching.
