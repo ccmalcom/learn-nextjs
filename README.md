@@ -145,7 +145,7 @@ Where you place your Suspense boundaries will depend on a few things:
 --What content you want to prioritize.
 --If the components rely on data fetching.
 
-### CH. 10: Partial Prerendering
+### CH. 10: Partial Prerendering (beta)
 Combining Static and Dynamic Content
 Currently, if you call a dynamic function inside your route (e.g. noStore(), cookies(), etc), your entire route becomes dynamic.
 
